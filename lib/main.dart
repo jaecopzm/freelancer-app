@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,17 +9,25 @@ import 'core/router/app_router.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase
-  await Supabase.initialize(
-    url: SupabaseConfig.supabaseUrl,
-    anonKey: SupabaseConfig.supabaseAnonKey,
-  );
+  try {
+    // Initialize Supabase with debug logging
+    debugPrint('🔄 Initializing Supabase...');
+    debugPrint('URL: ${SupabaseConfig.supabaseUrl}');
 
-  runApp(
-    const ProviderScope(
-      child: MainApp(),
-    ),
-  );
+    await Supabase.initialize(
+      url: SupabaseConfig.supabaseUrl,
+      anonKey: SupabaseConfig.supabaseAnonKey,
+      debug: SupabaseConfig.debugMode,
+    );
+
+    debugPrint('✅ Supabase initialized successfully');
+  } catch (e, stackTrace) {
+    debugPrint('❌ Supabase initialization failed: $e');
+    debugPrint('Stack trace: $stackTrace');
+    // Continue anyway - error will be shown in UI
+  }
+
+  runApp(const ProviderScope(child: MainApp()));
 }
 
 class MainApp extends ConsumerWidget {

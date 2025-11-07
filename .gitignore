@@ -64,3 +64,4 @@ Thumbs.db
 # Temporary files
 *.tmp
 tmp_rovodev_*
+supabase_migrations/002_expenses_table.sql
