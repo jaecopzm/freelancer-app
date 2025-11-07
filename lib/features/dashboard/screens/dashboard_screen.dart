@@ -6,6 +6,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../auth/widgets/email_verification_banner.dart';
 import '../../../shared/widgets/advanced_navbar.dart';
 import '../../../shared/widgets/custom_bottom_navbar.dart';
+import '../../../shared/models/user_profile.dart';
 import '../../invoices/providers/invoice_provider.dart';
 import '../../projects/providers/project_provider.dart';
 import '../../clients/providers/client_provider.dart';
@@ -164,13 +165,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     );
   }
 
-  Widget _buildWelcomeCard(BuildContext context, dynamic profile) {
+  Widget _buildWelcomeCard(BuildContext context, UserProfile? profile) {
     final hour = DateTime.now().hour;
     String greeting = hour < 12
         ? 'Good morning'
         : hour < 17
         ? 'Good afternoon'
         : 'Good evening';
+
+    // Get display name: prefer fullName, then businessName, then first part of email
+    String displayName = 'User';
+    if (profile != null) {
+      if (profile.fullName != null && profile.fullName!.isNotEmpty) {
+        displayName = profile.fullName!;
+      } else if (profile.businessName != null &&
+          profile.businessName!.isNotEmpty) {
+        displayName = profile.businessName!;
+      } else {
+        // Extract name from email (part before @)
+        displayName = profile.email.split('@').first;
+      }
+    }
 
     return _GlassCard(
       child: Padding(
@@ -182,12 +197,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '$greeting, ${profile?.fullName ?? 'User'}! 👋',
+                    '$greeting, $displayName! 👋',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
+                  if (profile?.businessName != null &&
+                      profile!.businessName!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        profile.businessName!,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   Text(
                     DateFormat('EEEE, MMMM d, y').format(DateTime.now()),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
